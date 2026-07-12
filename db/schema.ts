@@ -21,6 +21,15 @@ export const journalNotes = sqliteTable("journal_notes", {
   moodLabel: text("mood_label").notNull().default("平静"),
   moodIcon: text("mood_icon").notNull().default("😌"),
   moodScore: integer("mood_score").notNull().default(3),
+  timeUnknown: integer("time_unknown", { mode: "boolean" }).notNull().default(false),
   recordedAt: text("recorded_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const userProfiles = sqliteTable("user_profiles", {
+  ownerId: text("owner_id").primaryKey(),
+  nickname: text("nickname").notNull(),
+  avatar: text("avatar").notNull().default("🌤️"),
+  createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
