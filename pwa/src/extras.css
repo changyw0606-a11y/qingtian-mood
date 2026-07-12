@@ -1,0 +1,10 @@
+.mood-more{display:block;margin:10px auto 0}
+.custom-mood{display:block;margin-top:12px;color:#718083;font-size:11px;font-weight:800}
+.custom-mood input,.edit-note>input,.edit-note label input{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid #dce7e3;border-radius:11px;background:#fbfcf9}
+.note-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+.note-actions button{cursor:pointer}
+.secondary{border:0}
+.edit-note textarea{width:100%;min-height:110px;padding:12px;border:1px solid #dce7e3;border-radius:13px;background:#fbfcf9;resize:vertical}
+.edit-note label{display:block;margin:10px 0;color:#718083;font-size:11px;font-weight:800}
+.moods.compact{grid-template-columns:repeat(5,1fr)}
+.summary-custom{display:flex;gap:8px;margin-top:12px}.summary-custom input{min-width:0;flex:1;padding:10px;border:1px solid #dce7e3;border-radius:11px;background:#fbfcf9}.summary-custom .primary{white-space:nowrap}
