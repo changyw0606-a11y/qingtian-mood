@@ -1,32 +1,8 @@
-import { asc, desc, eq } from "drizzle-orm";
-import { getDb } from "../../../db";
-import { journalNotes, moodEntries } from "../../../db/schema";
-
-const validDate = /^\d{4}-\d{2}-\d{2}$/;
-
-export async function GET() {
-  try {
-    const db = getDb();
-    const [entries, notes] = await Promise.all([
-      db.select().from(moodEntries).orderBy(desc(moodEntries.date)).limit(370),
-      db.select().from(journalNotes).orderBy(asc(journalNotes.recordedAt)).limit(2000),
-    ]);
-    return Response.json({ entries, notes });
-  } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "读取失败" }, { status: 500 }); }
-}
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json() as { date?: string; mood?: string; moodLabel?: string; moodIcon?: string; content?: string };
-    if (!body.date || !validDate.test(body.date) || !body.mood || !body.moodLabel || !body.moodIcon) return Response.json({ error: "请先选择状态" }, { status: 400 });
-    const db = getDb();
-    const now = new Date().toISOString();
-    await db.insert(moodEntries).values({ date: body.date, mood: body.mood.slice(0, 40), moodLabel: body.moodLabel.slice(0, 20), moodIcon: body.moodIcon.slice(0, 8), updatedAt: now })
-      .onConflictDoUpdate({ target: moodEntries.date, set: { mood: body.mood.slice(0, 40), moodLabel: body.moodLabel.slice(0, 20), moodIcon: body.moodIcon.slice(0, 8), updatedAt: now } });
-    let note = null;
-    const content = String(body.content ?? "").trim().slice(0, 500);
-    if (content) [note] = await db.insert(journalNotes).values({ date: body.date, content, recordedAt: now, updatedAt: now }).returning();
-    const [entry] = await db.select().from(moodEntries).where(eq(moodEntries.date, body.date)).limit(1);
-    return Response.json({ entry, note });
-  } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "保存失败" }, { status: 500 }); }
-}
+import { and,asc,desc,eq } from "drizzle-orm";
+import { getDb } from "../../../db";import { journalNotes,moodEntries } from "../../../db/schema";import { moods } from "../../lib/moods";import { getChatGPTUser } from "../../chatgpt-auth";
+const validDate=/^\d{4}-\d{2}-\d{2}$/;
+async function owner(){const u=await getChatGPTUser();return u?.email??null}
+async function autoSummary(date:string,ownerId:string){const db=getDb(),notes=await db.select().from(journalNotes).where(and(eq(journalNotes.date,date),eq(journalNotes.ownerId,ownerId)));if(!notes.length)return null;const avg=notes.reduce((s,n)=>s+n.moodScore,0)/notes.length,candidates=moods.filter(m=>Math.abs(m.score-avg)<.6);return candidates.find(m=>notes.some(n=>n.mood===m.id))??candidates[0]??moods[1]}
+export async function GET(){try{const ownerId=await owner();if(!ownerId)return Response.json({error:"请登录"},{status:401});const db=getDb();await db.update(moodEntries).set({ownerId}).where(eq(moodEntries.ownerId,""));await db.update(journalNotes).set({ownerId}).where(eq(journalNotes.ownerId,""));const [entries,notes]=await Promise.all([db.select().from(moodEntries).where(eq(moodEntries.ownerId,ownerId)).orderBy(desc(moodEntries.date)).limit(370),db.select().from(journalNotes).where(eq(journalNotes.ownerId,ownerId)).orderBy(asc(journalNotes.recordedAt)).limit(2000)]);return Response.json({entries,notes})}catch(e){return Response.json({error:e instanceof Error?e.message:"读取失败"},{status:500})}}
+export async function POST(request:Request){try{const ownerId=await owner();if(!ownerId)return Response.json({error:"请登录"},{status:401});const b=await request.json() as {date?:string;content?:string;mood?:string;moodLabel?:string;moodIcon?:string;moodScore?:number};if(!b.date||!validDate.test(b.date)||!b.content?.trim()||!b.mood||!b.moodLabel||!b.moodIcon)return Response.json({error:"请填写随笔并选择心情"},{status:400});const db=getDb(),now=new Date().toISOString();const [note]=await db.insert(journalNotes).values({ownerId,date:b.date,content:b.content.trim().slice(0,500),mood:b.mood,moodLabel:b.moodLabel.slice(0,20),moodIcon:b.moodIcon.slice(0,8),moodScore:Math.max(1,Math.min(5,Number(b.moodScore)||3)),recordedAt:now,updatedAt:now}).returning();const [existing]=await db.select().from(moodEntries).where(and(eq(moodEntries.date,b.date),eq(moodEntries.ownerId,ownerId))).limit(1);if(!existing?.summaryManual){const s=await autoSummary(b.date,ownerId);if(s){if(existing)await db.update(moodEntries).set({mood:s.id,moodLabel:s.label,moodIcon:s.icon,summaryManual:false,updatedAt:now}).where(eq(moodEntries.id,existing.id));else await db.insert(moodEntries).values({ownerId,date:b.date,mood:s.id,moodLabel:s.label,moodIcon:s.icon,summaryManual:false,updatedAt:now})}}const [entry]=await db.select().from(moodEntries).where(and(eq(moodEntries.date,b.date),eq(moodEntries.ownerId,ownerId))).limit(1);return Response.json({entry,note})}catch(e){return Response.json({error:e instanceof Error?e.message:"保存失败"},{status:500})}}
+export async function PATCH(request:Request){const ownerId=await owner();if(!ownerId)return Response.json({error:"请登录"},{status:401});const b=await request.json() as {date?:string;mood?:string;moodLabel?:string;moodIcon?:string;automatic?:boolean};if(!b.date||!validDate.test(b.date))return Response.json({error:"日期无效"},{status:400});const db=getDb(),now=new Date().toISOString();let c;if(b.automatic){c=await autoSummary(b.date,ownerId);if(!c)return Response.json({error:"当天还没有随笔"},{status:400})}else{if(!b.mood||!b.moodLabel||!b.moodIcon)return Response.json({error:"请选择心情"},{status:400});c={id:b.mood,label:b.moodLabel,icon:b.moodIcon}}const [old]=await db.select().from(moodEntries).where(and(eq(moodEntries.date,b.date),eq(moodEntries.ownerId,ownerId)));if(old)await db.update(moodEntries).set({mood:c.id,moodLabel:c.label,moodIcon:c.icon,summaryManual:!b.automatic,updatedAt:now}).where(and(eq(moodEntries.id,old.id),eq(moodEntries.ownerId,ownerId)));else await db.insert(moodEntries).values({ownerId,date:b.date,mood:c.id,moodLabel:c.label,moodIcon:c.icon,summaryManual:!b.automatic,updatedAt:now});const [entry]=await db.select().from(moodEntries).where(and(eq(moodEntries.date,b.date),eq(moodEntries.ownerId,ownerId)));return Response.json({entry})}

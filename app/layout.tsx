@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
+import { AppNav } from "./components/AppNav";
+import { requireChatGPTUser } from "./chatgpt-auth";
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const headerStore = await headers();
@@ -21,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  await requireChatGPTUser("/");
+  return <html lang="zh-CN"><body>{children}<AppNav /></body></html>;
 }

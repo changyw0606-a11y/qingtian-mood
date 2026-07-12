@@ -1,17 +1,4 @@
-import { eq } from "drizzle-orm";
-import { getDb } from "../../../../db";
-import { journalNotes } from "../../../../db/schema";
-
-export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const content = String(((await request.json()) as { content?: string }).content ?? "").trim().slice(0, 500);
-  if (!content) return Response.json({ error: "随笔不能为空" }, { status: 400 });
-  const [note] = await getDb().update(journalNotes).set({ content, updatedAt: new Date().toISOString() }).where(eq(journalNotes.id, Number(id))).returning();
-  return note ? Response.json({ note }) : Response.json({ error: "记录不存在" }, { status: 404 });
-}
-
-export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  await getDb().delete(journalNotes).where(eq(journalNotes.id, Number(id)));
-  return new Response(null, { status: 204 });
-}
+import { and,eq } from "drizzle-orm";import { getDb } from "../../../../db";import { journalNotes,moodEntries } from "../../../../db/schema";import { getChatGPTUser } from "../../../chatgpt-auth";import { moods } from "../../../lib/moods";
+async function refresh(date:string,ownerId:string){const db=getDb(),[entry]=await db.select().from(moodEntries).where(and(eq(moodEntries.date,date),eq(moodEntries.ownerId,ownerId)));if(!entry||entry.summaryManual)return;const notes=await db.select().from(journalNotes).where(and(eq(journalNotes.date,date),eq(journalNotes.ownerId,ownerId)));if(!notes.length){await db.delete(moodEntries).where(eq(moodEntries.id,entry.id));return}const avg=notes.reduce((s,n)=>s+n.moodScore,0)/notes.length,candidates=moods.filter(m=>Math.abs(m.score-avg)<.6),winner=candidates.find(m=>notes.some(n=>n.mood===m.id))??candidates[0]??moods[1];await db.update(moodEntries).set({mood:winner.id,moodLabel:winner.label,moodIcon:winner.icon,updatedAt:new Date().toISOString()}).where(eq(moodEntries.id,entry.id))}
+export async function PATCH(request:Request,context:{params:Promise<{id:string}>}){const u=await getChatGPTUser();if(!u)return Response.json({error:"请登录"},{status:401});const {id}=await context.params,b=await request.json() as {content?:string;mood?:string;moodLabel?:string;moodIcon?:string;moodScore?:number},content=String(b.content??"").trim().slice(0,500);if(!content)return Response.json({error:"随笔不能为空"},{status:400});const db=getDb(),changes:Partial<typeof journalNotes.$inferInsert>={content,updatedAt:new Date().toISOString()};if(b.mood&&b.moodLabel&&b.moodIcon)Object.assign(changes,{mood:b.mood,moodLabel:b.moodLabel,moodIcon:b.moodIcon,moodScore:Math.max(1,Math.min(5,Number(b.moodScore)||3))});const [note]=await db.update(journalNotes).set(changes).where(and(eq(journalNotes.id,Number(id)),eq(journalNotes.ownerId,u.email))).returning();if(note)await refresh(note.date,u.email);return note?Response.json({note}):Response.json({error:"记录不存在"},{status:404})}
+export async function DELETE(_r:Request,context:{params:Promise<{id:string}>}){const u=await getChatGPTUser();if(!u)return Response.json({error:"请登录"},{status:401});const {id}=await context.params,db=getDb();const [note]=await db.select().from(journalNotes).where(and(eq(journalNotes.id,Number(id)),eq(journalNotes.ownerId,u.email)));if(note){await db.delete(journalNotes).where(eq(journalNotes.id,note.id));await refresh(note.date,u.email)}return new Response(null,{status:204})}
