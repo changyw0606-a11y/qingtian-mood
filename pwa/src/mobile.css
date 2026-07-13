@@ -1,0 +1,43 @@
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+.shell {
+  min-height: 100dvh;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+}
+
+header {
+  height: calc(68px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
+.primary,
+.secondary,
+.link,
+.back,
+.danger,
+.auto,
+.summary > button,
+.calnav button {
+  min-height: 44px;
+}
+
+.calnav button {
+  width: 44px;
+  height: 44px;
+}
+
+@media (max-width: 640px) {
+  header {
+    height: calc(62px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+}
