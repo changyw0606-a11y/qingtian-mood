@@ -37,19 +37,44 @@ header {
 
 .datetime,
 .datetime label,
-.datetime input,
+.native-field,
+.native-field input,
 .now-time {
   min-width: 0;
   max-width: 100%;
 }
 
 .datetime label {
+  display: block;
+  width: 100%;
   overflow: hidden;
 }
 
-.datetime input {
+.native-field {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  overflow: hidden;
+  border: 1px solid #dce7e3;
+  border-radius: 11px;
+  background: #fbfcf9;
+}
+
+.datetime .native-field input,
+.edit-note .native-field input {
+  display: block;
   inline-size: 100%;
+  width: 100%;
   min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: 9px 11px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
   font-size: 16px;
 }
 
