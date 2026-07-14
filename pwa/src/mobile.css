@@ -35,9 +35,36 @@ header {
   height: 44px;
 }
 
+.datetime,
+.datetime label,
+.datetime input,
+.now-time {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.datetime label {
+  overflow: hidden;
+}
+
+.datetime input {
+  inline-size: 100%;
+  min-inline-size: 0;
+  font-size: 16px;
+}
+
 @media (max-width: 640px) {
   header {
     height: calc(62px + env(safe-area-inset-top));
     padding-top: env(safe-area-inset-top);
   }
+
+  .custom-mood-editor {
+    flex-direction: column;
+  }
+
+  .custom-mood-editor .primary {
+    width: 100%;
+  }
+
 }

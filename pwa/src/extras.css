@@ -8,3 +8,13 @@
 .edit-note label{display:block;margin:10px 0;color:#718083;font-size:11px;font-weight:800}
 .moods.compact{grid-template-columns:repeat(5,1fr)}
 .summary-custom{display:flex;gap:8px;margin-top:12px}.summary-custom input{min-width:0;flex:1;padding:10px;border:1px solid #dce7e3;border-radius:11px;background:#fbfcf9}.summary-custom .primary{white-space:nowrap}
+.custom-mood-editor{display:flex;gap:8px;margin-top:12px;padding:12px;border-radius:14px;background:#fff9e8}
+.custom-mood-editor input{min-width:0;flex:1;padding:10px;border:1px solid #dce7e3;border-radius:11px;background:#fff;font-size:16px}
+.custom-mood-editor .primary{flex:none;white-space:nowrap}
+.add-custom-mood span{font-weight:800;color:#548da1}
+.now-time{min-width:0;padding:9px 11px;border:1px solid #dce7e3;border-radius:11px;background:#fbfcf9}
+.now-time small,.now-time b{display:block}.now-time small{font-size:11px;color:#718083}.now-time b{margin-top:5px;font-size:13px;color:#4f777d}
+.picker-title{display:block;margin:14px 0 10px;color:#667678;font-size:12px}
+.time-fixed{padding:10px 12px;border-radius:11px;background:#f4f7f3;color:#5f777a;font-size:12px}
+.future-day{padding:34px 20px;text-align:center}.future-day strong{font-size:20px}.future-day p{margin:8px 0 0;color:#7b898b;font-size:13px}
+.grid button.future,.grid button:disabled,.calnav button:disabled{cursor:not-allowed;opacity:.34}
