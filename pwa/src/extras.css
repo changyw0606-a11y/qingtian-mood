@@ -60,3 +60,75 @@
 .locked-note{border:1px dashed #d5cde2;border-radius:15px;background:#faf8fc}.locked-content{text-align:center}.locked-content>div{display:flex;justify-content:space-between}.locked-content p{margin:9px 0;color:#85818d;font-size:11px}.locked-content time{color:#929e9f;font-size:11px}
 .password-backdrop{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:18px;background:#26323866;backdrop-filter:blur(8px)}.password-dialog{position:relative;width:min(360px,100%);padding:26px 22px 22px;border-radius:24px;background:#fff;text-align:center;box-shadow:0 24px 70px #1e2a2d4d}.password-dialog h2{margin:8px 0}.password-dialog p{margin:0 0 14px;color:#758386;font-size:12px}.password-dialog>small{display:block;margin-top:7px;color:#b05d5d}.dialog-close{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:#eef1ee;font-size:24px}.lock-mark{font-size:35px}
 .storage-warning{position:sticky;top:68px;z-index:4;width:min(820px,calc(100% - 24px));margin:8px auto 0;padding:10px 13px;border-radius:13px;background:#fff0ed;color:#995a55;font-size:11px;box-shadow:0 8px 20px #6f47471f}
+
+/* Final Qingtian mood artwork */
+.mood-grid .mood-face.mood-character,
+.mood-character{
+  display:block;
+  width:58px;
+  height:58px;
+  object-fit:contain;
+  overflow:visible;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
+.mood-grid .mood-tile:nth-child(4n) .mood-character{transform:none}
+.custom-character{
+  display:inline-grid;
+  place-items:center;
+  width:52px;
+  height:50px;
+  border-radius:47% 53% 50% 46% / 52% 45% 55% 48%;
+  background:#bfa9e2;
+  color:#fff;
+  font-size:17px;
+  font-weight:900;
+  box-shadow:inset 0 -3px 0 #755e9c1f;
+}
+.mood-empty{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#e6ebea;color:#7e8a8a;font-weight:900}
+.calendar-page .heading{margin-bottom:18px}
+.calendar .grid{gap:0;align-items:start}
+.calendar .grid>i{height:74px}
+.calendar .grid button{
+  min-width:0;
+  height:74px;
+  aspect-ratio:auto;
+  justify-content:flex-start;
+  gap:0;
+  padding:1px 0 0;
+  border-radius:0;
+  background:transparent;
+  outline:0;
+}
+.calendar .grid button.today{outline:0;background:transparent}
+.calendar .day-number{
+  display:grid;
+  place-items:center;
+  width:23px;
+  height:20px;
+  margin:0 auto;
+  border-radius:99px;
+  font-size:11px;
+  line-height:1;
+}
+.calendar .grid button.today .day-number{background:#f7d46b;color:#4d401e;font-weight:900}
+.calendar .grid button.future .day-number{background:transparent}
+.calendar .calendar-mood{
+  width:min(50px,100%);
+  height:50px;
+  margin:-1px auto 0;
+  object-fit:contain;
+}
+.calendar .custom-character.calendar-mood{display:grid;width:43px;height:42px;margin:3px auto 0;font-size:14px}
+.calendar-hint{margin:10px 4px 0;color:#8a9697;font-size:10px;text-align:center}
+.summary-mood{display:inline-block;width:48px;height:48px;vertical-align:middle}
+.summary .custom-character.summary-mood{display:inline-grid}
+.summary-empty{display:inline-grid;width:40px;height:40px;place-items:center;border-radius:50%;background:#eef2ef;vertical-align:middle}
+.inline-mood{display:inline-block;width:28px;height:28px;vertical-align:middle}
+.meta .custom-character.inline-mood{display:inline-grid;font-size:9px}
+.preview .mini-mood{width:30px;height:30px}
+.preview .custom-character.mini-mood{display:grid;font-size:9px}
+.preview-lock{display:grid;width:30px;height:30px;place-items:center}
+.private-placeholder{letter-spacing:.16em;color:#727d7e}
