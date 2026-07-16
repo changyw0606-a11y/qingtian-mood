@@ -98,4 +98,17 @@ header {
     gap: 7px;
   }
 
+  .privacy-card-head {
+    align-items: flex-start;
+  }
+
+  .privacy-card-head > .secondary {
+    flex: none;
+  }
+
+  .image-hint {
+    display: block;
+    margin: 6px 0 0;
+  }
+
 }
