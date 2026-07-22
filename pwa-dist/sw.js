@@ -1,5 +1,5 @@
 const BASE="/qingtian-mood/";
-const CACHE="qingtian-local-v9";
+const CACHE="qingtian-local-v10";
 const MOODS=["super-happy","small-happy","light","shy","calm","speechless","tired","anxious","sad","angry"];
 const SHELL=[
   BASE,

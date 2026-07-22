@@ -20,11 +20,16 @@ export const moods:Mood[]=[
 
 export const customMoodColor="#BFAFE2";
 export const moodPalette=[
-  {id:"pink",label:"樱粉",color:"#F7AAA9"},
-  {id:"apricot",label:"奶杏",color:"#F2B77E"},
-  {id:"green",label:"青苹",color:"#A9D36F"},
-  {id:"blue",label:"晴蓝",color:"#8FC9EA"},
-  {id:"purple",label:"丁香",color:"#B1A3E1"}
+  {id:"sunny",label:"阳光黄",color:"#FFD04D"},
+  {id:"sprout",label:"嫩芽黄绿",color:"#DFE86D"},
+  {id:"mint",label:"薄荷青",color:"#C9EBDD"},
+  {id:"shy",label:"害羞粉",color:"#F5A0A7"},
+  {id:"leaf",label:"草木绿",color:"#A9D65D"},
+  {id:"cloud",label:"云朵灰",color:"#B9B9B7"},
+  {id:"oat",label:"燕麦色",color:"#CDBBAA"},
+  {id:"mist",label:"雾紫",color:"#9EA9EA"},
+  {id:"sky",label:"晴空蓝",color:"#8FD1F3"},
+  {id:"coral",label:"珊瑚红",color:"#F47B68"}
 ] as const;
 const moodById=new Map(moods.map(m=>[m.id,m]));
 const legacyPrimary:Record<string,string>={happy:"small_happy",proud:"super_happy",relaxed:"light",moved:"shy",blank:"calm"};
@@ -48,7 +53,10 @@ export function moodForRecord(record:{mood:string;moodLabel:string;moodIcon:stri
 
 const KEY="qingtian-local-data-v1";
 const empty:Data={profile:null,notes:[],days:[],customMoods:[],privacy:null};
-const legacyMoodColors:Record<string,string>={"#F3A3B7":"#F7AAA9"};
+const legacyMoodColors:Record<string,string>={
+  "#F3A3B7":"#F5A0A7","#F7AAA9":"#F5A0A7","#E9A4A6":"#F5A0A7",
+  "#F2B77E":"#CDBBAA","#A9D36F":"#A9D65D","#8FC9EA":"#8FD1F3","#B1A3E1":"#9EA9EA"
+};
 function migrateMood<T extends {mood:string;moodLabel:string;moodIcon:string;moodColor?:string}>(record:T):T{
   const nextId=legacyPrimary[record.mood];
   if(!nextId){const storedColor=record.moodColor&&legacyMoodColors[record.moodColor]||record.moodColor;return{...record,moodColor:moodColor(record.mood,storedColor)}}
