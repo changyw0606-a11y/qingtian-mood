@@ -27,7 +27,7 @@ async function noteImageFromFile(file:File){
 function ImagePicker({images,onChange}:{images:string[];onChange:(images:string[])=>void}){const[busy,setBusy]=useState(false),[error,setError]=useState("");return <div className="entry-images"><div className="entry-image-grid">{images.map((src,i)=><figure key={`${src.slice(-18)}-${i}`}><img src={src} alt={`随笔图片 ${i+1}`}/><button type="button" aria-label={`删除第 ${i+1} 张图片`} onClick={()=>onChange(images.filter((_,n)=>n!==i))}>×</button></figure>)}</div>{images.length<3&&<label className={`image-picker${busy?" loading":""}`}>🖼️ {busy?"正在处理…":images.length?"继续添加图片":"添加图片"}<input type="file" accept="image/*" multiple disabled={busy} onChange={async e=>{const files=Array.from(e.target.files||[]).slice(0,3-images.length);e.target.value="";if(!files.length)return;setBusy(true);setError("");try{const next=[];for(const file of files)next.push(await noteImageFromFile(file));onChange([...images,...next])}catch(err){setError(err instanceof Error?err.message:"无法处理图片")}finally{setBusy(false)}}}/></label>}<small className="image-hint">最多 3 张，图片只保存在这台设备。</small>{error&&<small className="photo-picker-error">{error}</small>}</div>}
 const moodAsset=(id:string)=>`${import.meta.env.BASE_URL}moods/${moodAssetKey(id)}.webp`;
 const moodTint:Record<string,string>={
-  "#F3A3B7":"grayscale(1) sepia(.55) saturate(2.2) hue-rotate(280deg) brightness(1)",
+  "#F7AAA9":"grayscale(1) sepia(.7) saturate(3.4) hue-rotate(310deg) brightness(.92)",
   "#F2B77E":"grayscale(1) sepia(.42) saturate(1.55) hue-rotate(345deg) brightness(.98)",
   "#A9D36F":"grayscale(1) sepia(.36) saturate(1.55) hue-rotate(52deg) brightness(.98)",
   "#8FC9EA":"grayscale(1) sepia(.3) saturate(1.65) hue-rotate(157deg) brightness(.99)",

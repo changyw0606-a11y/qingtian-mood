@@ -20,7 +20,7 @@ export const moods:Mood[]=[
 
 export const customMoodColor="#BFAFE2";
 export const moodPalette=[
-  {id:"pink",label:"樱粉",color:"#F3A3B7"},
+  {id:"pink",label:"樱粉",color:"#F7AAA9"},
   {id:"apricot",label:"奶杏",color:"#F2B77E"},
   {id:"green",label:"青苹",color:"#A9D36F"},
   {id:"blue",label:"晴蓝",color:"#8FC9EA"},
@@ -48,9 +48,10 @@ export function moodForRecord(record:{mood:string;moodLabel:string;moodIcon:stri
 
 const KEY="qingtian-local-data-v1";
 const empty:Data={profile:null,notes:[],days:[],customMoods:[],privacy:null};
+const legacyMoodColors:Record<string,string>={"#F3A3B7":"#F7AAA9"};
 function migrateMood<T extends {mood:string;moodLabel:string;moodIcon:string;moodColor?:string}>(record:T):T{
   const nextId=legacyPrimary[record.mood];
-  if(!nextId)return{...record,moodColor:moodColor(record.mood,record.moodColor)};
+  if(!nextId){const storedColor=record.moodColor&&legacyMoodColors[record.moodColor]||record.moodColor;return{...record,moodColor:moodColor(record.mood,storedColor)}}
   const next=moodById.get(nextId)!;
   return{...record,mood:next.id,moodLabel:next.label,moodIcon:next.icon,moodColor:next.color};
 }
