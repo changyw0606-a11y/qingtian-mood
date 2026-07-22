@@ -111,4 +111,15 @@ header {
     margin: 6px 0 0;
   }
 
+  .mood-color-picker {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-swatches {
+    width: 100%;
+    justify-content: space-between;
+  }
+
 }

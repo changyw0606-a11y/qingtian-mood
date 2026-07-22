@@ -19,6 +19,13 @@ export const moods:Mood[]=[
 ];
 
 export const customMoodColor="#BFAFE2";
+export const moodPalette=[
+  {id:"pink",label:"樱粉",color:"#F3A3B7"},
+  {id:"apricot",label:"奶杏",color:"#F2B77E"},
+  {id:"green",label:"青苹",color:"#A9D36F"},
+  {id:"blue",label:"晴蓝",color:"#8FC9EA"},
+  {id:"purple",label:"丁香",color:"#B1A3E1"}
+] as const;
 const moodById=new Map(moods.map(m=>[m.id,m]));
 const legacyPrimary:Record<string,string>={happy:"small_happy",proud:"super_happy",relaxed:"light",moved:"shy",blank:"calm"};
 const legacyVisual:Record<string,string>={
@@ -36,7 +43,7 @@ export function moodAssetKey(id:string){
 export function moodColor(id:string,fallback?:string){const normalized=legacyPrimary[id]||id;return moodById.get(normalized)?.color||fallback||customMoodColor}
 export function moodForRecord(record:{mood:string;moodLabel:string;moodIcon:string;moodScore:number;moodColor?:string}):Mood{
   const direct=moodById.get(record.mood);
-  return direct||{id:record.mood,icon:record.moodIcon||"",label:record.moodLabel||"自定义",score:record.moodScore||3,color:record.moodColor||moodColor(record.mood)};
+  return direct?{...direct,color:record.moodColor||direct.color}: {id:record.mood,icon:record.moodIcon||"",label:record.moodLabel||"自定义",score:record.moodScore||3,color:record.moodColor||moodColor(record.mood)};
 }
 
 const KEY="qingtian-local-data-v1";
@@ -47,13 +54,26 @@ function migrateMood<T extends {mood:string;moodLabel:string;moodIcon:string;moo
   const next=moodById.get(nextId)!;
   return{...record,mood:next.id,moodLabel:next.label,moodIcon:next.icon,moodColor:next.color};
 }
-export function normalizeData(stored:Partial<Data>):Data{return{
-  ...empty,...stored,
-  customMoods:stored.customMoods||[],privacy:stored.privacy||null,
-  notes:(stored.notes||[]).map(n=>{const migrated=migrateMood({...n,images:n.images||[],private:Boolean(n.private)});return{...migrated,moodScore:moodById.get(migrated.mood)?.score||migrated.moodScore}}),
-  days:(stored.days||[]).map(d=>migrateMood(d))
-}}
+export function normalizeData(stored:Partial<Data>):Data{
+  const notes=(stored.notes||[]).map(n=>{const migrated=migrateMood({...n,images:n.images||[],private:Boolean(n.private)});return{...migrated,moodScore:moodById.get(migrated.mood)?.score||migrated.moodScore}});
+  const migratedDays=(stored.days||[]).map(d=>migrateMood(d)),manualDays=migratedDays.filter(d=>d.summaryManual),manualDates=new Set(manualDays.map(d=>d.date)),noteDates=[...new Set(notes.map(n=>n.date))],automaticDays=noteDates.filter(date=>!manualDates.has(date)).map(date=>{const s=summarize(notes,date);return{date,mood:s.id,moodLabel:s.label,moodIcon:s.icon,moodColor:s.color,summaryManual:false}});
+  return{...empty,...stored,customMoods:stored.customMoods||[],privacy:stored.privacy||null,notes,days:[...manualDays,...automaticDays]};
+}
 export function load():Data{try{return normalizeData(JSON.parse(localStorage.getItem(KEY)||""))}catch{return empty}}
 export function save(data:Data){localStorage.setItem(KEY,JSON.stringify(data))}
 export const pad=(n:number)=>String(n).padStart(2,"0");export const dateKey=(d:Date)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;export const timeText=(iso:string)=>new Date(iso).toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit",hour12:false});
-export function summarize(notes:Note[],date:string):Mood{const valid=notes.filter(n=>n.date===date&&n.mood!=="unknown");if(!valid.length)return{id:"unknown",icon:"",label:"心情未知",score:3,color:"#D7DDE0"};if(valid.length===1&&valid[0].mood.startsWith("custom:"))return{id:valid[0].mood,icon:valid[0].moodIcon,label:valid[0].moodLabel,score:valid[0].moodScore,color:moodColor(valid[0].mood,valid[0].moodColor)};const avg=valid.reduce((s,n)=>s+n.moodScore,0)/valid.length,c=moods.filter(m=>Math.abs(m.score-avg)<.6);return c.find(m=>valid.some(n=>n.mood===m.id))||c[0]||moods[4]}
+export function summarize(notes:Note[],date:string):Mood{
+  const valid=notes.filter(n=>n.date===date&&n.mood!=="unknown").sort((a,b)=>a.recordedAt.localeCompare(b.recordedAt));
+  if(!valid.length)return{id:"unknown",icon:"",label:"心情未知",score:3,color:"#D7DDE0"};
+  const support=new Map<string,{weight:number;count:number;last:number}>(),last=Math.max(1,valid.length-1);
+  valid.forEach((note,index)=>{
+    // 比起简单平均，出现次数是主要依据；较晚的感受有温和加权，时间未知的补记稍降权。
+    const recency=.9+.35*(index/last),weight=recency*(note.timeUnknown?.9:1),current=support.get(note.mood)||{weight:0,count:0,last:-1};
+    support.set(note.mood,{weight:current.weight+weight,count:current.count+1,last:index});
+  });
+  const winner=[...support.entries()].sort((a,b)=>{
+    const aScore=a[1].weight*(1+Math.min(.24,(a[1].count-1)*.08)),bScore=b[1].weight*(1+Math.min(.24,(b[1].count-1)*.08));
+    return bScore-aScore||b[1].last-a[1].last;
+  })[0][0],representative=[...valid].reverse().find(n=>n.mood===winner)!;
+  return moodForRecord(representative);
+}
