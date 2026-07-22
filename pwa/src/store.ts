@@ -20,16 +20,16 @@ export const moods:Mood[]=[
 
 export const customMoodColor="#BFAFE2";
 export const moodPalette=[
-  {id:"sunny",label:"阳光黄",color:"#FBCC34"},
-  {id:"sprout",label:"嫩芽黄绿",color:"#E5E384"},
-  {id:"mint",label:"薄荷青",color:"#CEE9D5"},
-  {id:"shy",label:"害羞粉",color:"#FAB3AF"},
-  {id:"leaf",label:"草木绿",color:"#BFD15E"},
-  {id:"cloud",label:"云朵灰",color:"#BFB9B4"},
-  {id:"oat",label:"燕麦色",color:"#D6BFAD"},
-  {id:"mist",label:"雾紫",color:"#A7AEDE"},
-  {id:"sky",label:"晴空蓝",color:"#B1DBF0"},
-  {id:"coral",label:"珊瑚红",color:"#F78570"}
+  {id:"sunny",asset:"super-happy",label:"阳光黄",color:"#FBCC34"},
+  {id:"sprout",asset:"small-happy",label:"嫩芽黄绿",color:"#E5E384"},
+  {id:"mint",asset:"light",label:"薄荷青",color:"#CEE9D5"},
+  {id:"shy",asset:"shy",label:"害羞粉",color:"#FAB3AF"},
+  {id:"leaf",asset:"calm",label:"草木绿",color:"#BFD15E"},
+  {id:"cloud",asset:"speechless",label:"云朵灰",color:"#BFB9B4"},
+  {id:"oat",asset:"tired",label:"燕麦色",color:"#D6BFAD"},
+  {id:"mist",asset:"anxious",label:"雾紫",color:"#A7AEDE"},
+  {id:"sky",asset:"sad",label:"晴空蓝",color:"#B1DBF0"},
+  {id:"coral",asset:"angry",label:"珊瑚红",color:"#F78570"}
 ] as const;
 const moodById=new Map(moods.map(m=>[m.id,m]));
 const legacyPrimary:Record<string,string>={happy:"small_happy",proud:"super_happy",relaxed:"light",moved:"shy",blank:"calm"};
