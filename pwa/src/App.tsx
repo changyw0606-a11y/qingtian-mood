@@ -26,19 +26,23 @@ async function noteImageFromFile(file:File){
 }
 function ImagePicker({images,onChange}:{images:string[];onChange:(images:string[])=>void}){const[busy,setBusy]=useState(false),[error,setError]=useState("");return <div className="entry-images"><div className="entry-image-grid">{images.map((src,i)=><figure key={`${src.slice(-18)}-${i}`}><img src={src} alt={`随笔图片 ${i+1}`}/><button type="button" aria-label={`删除第 ${i+1} 张图片`} onClick={()=>onChange(images.filter((_,n)=>n!==i))}>×</button></figure>)}</div>{images.length<3&&<label className={`image-picker${busy?" loading":""}`}>🖼️ {busy?"正在处理…":images.length?"继续添加图片":"添加图片"}<input type="file" accept="image/*" multiple disabled={busy} onChange={async e=>{const files=Array.from(e.target.files||[]).slice(0,3-images.length);e.target.value="";if(!files.length)return;setBusy(true);setError("");try{const next=[];for(const file of files)next.push(await noteImageFromFile(file));onChange([...images,...next])}catch(err){setError(err instanceof Error?err.message:"无法处理图片")}finally{setBusy(false)}}}/></label>}<small className="image-hint">最多 3 张，图片只保存在这台设备。</small>{error&&<small className="photo-picker-error">{error}</small>}</div>}
 const moodAsset=(id:string)=>`${import.meta.env.BASE_URL}moods/${moodAssetKey(id)}.webp`;
-const moodTint:Record<string,string>={
-  "#FFD04D":"grayscale(1) sepia(.75) saturate(2.2) hue-rotate(350deg) brightness(.98)",
-  "#DFE86D":"grayscale(1) sepia(.5) saturate(1.7) hue-rotate(28deg) brightness(.98)",
-  "#C9EBDD":"grayscale(1) sepia(.2) saturate(1.25) hue-rotate(95deg) brightness(1.03)",
-  "#F5A0A7":"grayscale(1) sepia(.42) saturate(1.8) hue-rotate(310deg) brightness(.88) contrast(.92)",
-  "#A9D65D":"grayscale(1) sepia(.36) saturate(1.55) hue-rotate(52deg) brightness(.98)",
-  "#B9B9B7":"grayscale(1) saturate(.2) brightness(.9)",
-  "#CDBBAA":"grayscale(1) sepia(.22) saturate(.75) brightness(.9)",
-  "#9EA9EA":"grayscale(1) sepia(.32) saturate(1.6) hue-rotate(215deg) brightness(.99)",
-  "#8FD1F3":"grayscale(1) sepia(.3) saturate(1.65) hue-rotate(157deg) brightness(.99)",
-  "#F47B68":"grayscale(1) sepia(.65) saturate(2.1) hue-rotate(320deg) brightness(.86) contrast(.94)"
+const moodNormalize:Record<string,number>={
+  "super-happy":.985,"small-happy":.907,"light":.886,"shy":1.032,"calm":1.016,
+  speechless:1.076,tired:1.028,anxious:1.136,sad:.945,angry:1.284
 };
-function MoodFace({m,className=""}:{m:Mood;className?:string}){const color=m.color||moodColor(m.id),filter=color!==moodColor(m.id)?moodTint[color]:undefined;return m.id==="unknown"?<span className={`mood-face mood-empty ${className}`} aria-hidden="true">?</span>:m.id.startsWith("custom:")||moodAssetKey(m.id)==="custom"?<span className={`mood-face custom-character ${className}`} style={{background:color}} aria-hidden="true">自</span>:<img className={`mood-face mood-character ${className}`} style={filter?{filter}:undefined} src={moodAsset(m.id)} alt="" aria-hidden="true"/>}
+const moodTint:Record<string,string>={
+  "#FBCC34":"sepia(.811) saturate(4.72) hue-rotate(346.1deg) brightness(.981)",
+  "#E5E384":"sepia(.838) saturate(1.836) hue-rotate(20.6deg) brightness(.934)",
+  "#CEE9D5":"sepia(.342) saturate(1.06) hue-rotate(83.1deg) brightness(1.052)",
+  "#FAB3AF":"sepia(.603) saturate(1.851) hue-rotate(314.5deg) brightness(.858)",
+  "#BFD15E":"sepia(.883) saturate(2.278) hue-rotate(29.3deg) brightness(.827)",
+  "#BFB9B4":"sepia(.151) saturate(.929) hue-rotate(345.3deg) brightness(.9)",
+  "#D6BFAD":"sepia(.25) saturate(2.034) hue-rotate(344deg) brightness(.923)",
+  "#A7AEDE":"sepia(.39) saturate(2.394) hue-rotate(195deg) brightness(.812)",
+  "#B1DBF0":"sepia(.61) saturate(1.268) hue-rotate(155.4deg) brightness(.935)",
+  "#F78570":"sepia(.555) saturate(4.23) hue-rotate(321.6deg) brightness(.696)"
+};
+function MoodFace({m,className=""}:{m:Mood;className?:string}){const color=m.color||moodColor(m.id),assetKey=moodAssetKey(m.id),tint=color!==moodColor(m.id)?moodTint[color]:undefined,filter=tint?`grayscale(1) brightness(${moodNormalize[assetKey]||1}) ${tint}`:undefined;return m.id==="unknown"?<span className={`mood-face mood-empty ${className}`} aria-hidden="true">?</span>:m.id.startsWith("custom:")||assetKey==="custom"?<span className={`mood-face custom-character ${className}`} style={{background:color}} aria-hidden="true">自</span>:<img className={`mood-face mood-character ${className}`} style={filter?{filter}:undefined} src={moodAsset(m.id)} alt="" aria-hidden="true"/>}
 function MoodButton({m,active,onClick}:{m:Mood;active:boolean;onClick:()=>void}){return <button type="button" className={`mood-tile${active?" active":""}`} style={{"--mood-color":m.color||moodColor(m.id)} as CSSProperties} onClick={onClick}><MoodFace m={m}/><small>{m.label}</small></button>}
 function MoodColorPicker({mood,onChange}:{mood:Mood;onChange:(color:string)=>void}){const original=moodColor(mood.id),options=[{id:"original",label:"原色",color:original},...moodPalette.filter(option=>option.color!==original)];return <div className="mood-color-picker"><div><b>小人颜色</b><small>来自晴天小人的原生配色</small></div><div className="color-swatches">{options.map(option=><button type="button" key={option.id} className={(mood.color||original)===option.color?"active":""} aria-label={option.label} title={option.label} style={{"--swatch":option.color} as CSSProperties} onClick={()=>onChange(option.color)}><span/></button>)}</div></div>}
 function customMoodOptions(data:Data){const all=[...(data.customMoods||[]),...data.notes.filter(n=>n.mood.startsWith("custom:")).map(n=>({id:n.mood,icon:n.moodIcon||"✨",label:n.moodLabel,score:n.moodScore||3,color:n.moodColor||customMoodColor}))],unique=new Map<string,Mood>();all.forEach(m=>unique.set(m.id,m));return[...unique.values()]}

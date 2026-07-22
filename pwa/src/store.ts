@@ -6,30 +6,30 @@ export type PrivacySettings={salt:string;hash:string};
 export type Data={profile:Profile|null;notes:Note[];days:DayMood[];customMoods:Mood[];privacy:PrivacySettings|null};
 
 export const moods:Mood[]=[
-  {id:"super_happy",icon:"",label:"超开心",score:5,color:"#FFD04D"},
-  {id:"small_happy",icon:"",label:"小开心",score:4,color:"#DFE86D"},
-  {id:"light",icon:"",label:"轻松",score:4,color:"#C9EBDD"},
-  {id:"shy",icon:"",label:"害羞",score:4,color:"#F5A0A7"},
-  {id:"calm",icon:"",label:"平静",score:3,color:"#A9D65D"},
-  {id:"speechless",icon:"",label:"无语",score:2,color:"#B9B9B7"},
-  {id:"tired",icon:"",label:"疲惫",score:2,color:"#CDBBAA"},
-  {id:"anxious",icon:"",label:"焦虑",score:1,color:"#9EA9EA"},
-  {id:"sad",icon:"",label:"难过",score:1,color:"#8FD1F3"},
-  {id:"angry",icon:"",label:"生气",score:1,color:"#F47B68"}
+  {id:"super_happy",icon:"",label:"超开心",score:5,color:"#FBCC34"},
+  {id:"small_happy",icon:"",label:"小开心",score:4,color:"#E5E384"},
+  {id:"light",icon:"",label:"轻松",score:4,color:"#CEE9D5"},
+  {id:"shy",icon:"",label:"害羞",score:4,color:"#FAB3AF"},
+  {id:"calm",icon:"",label:"平静",score:3,color:"#BFD15E"},
+  {id:"speechless",icon:"",label:"无语",score:2,color:"#BFB9B4"},
+  {id:"tired",icon:"",label:"疲惫",score:2,color:"#D6BFAD"},
+  {id:"anxious",icon:"",label:"焦虑",score:1,color:"#A7AEDE"},
+  {id:"sad",icon:"",label:"难过",score:1,color:"#B1DBF0"},
+  {id:"angry",icon:"",label:"生气",score:1,color:"#F78570"}
 ];
 
 export const customMoodColor="#BFAFE2";
 export const moodPalette=[
-  {id:"sunny",label:"阳光黄",color:"#FFD04D"},
-  {id:"sprout",label:"嫩芽黄绿",color:"#DFE86D"},
-  {id:"mint",label:"薄荷青",color:"#C9EBDD"},
-  {id:"shy",label:"害羞粉",color:"#F5A0A7"},
-  {id:"leaf",label:"草木绿",color:"#A9D65D"},
-  {id:"cloud",label:"云朵灰",color:"#B9B9B7"},
-  {id:"oat",label:"燕麦色",color:"#CDBBAA"},
-  {id:"mist",label:"雾紫",color:"#9EA9EA"},
-  {id:"sky",label:"晴空蓝",color:"#8FD1F3"},
-  {id:"coral",label:"珊瑚红",color:"#F47B68"}
+  {id:"sunny",label:"阳光黄",color:"#FBCC34"},
+  {id:"sprout",label:"嫩芽黄绿",color:"#E5E384"},
+  {id:"mint",label:"薄荷青",color:"#CEE9D5"},
+  {id:"shy",label:"害羞粉",color:"#FAB3AF"},
+  {id:"leaf",label:"草木绿",color:"#BFD15E"},
+  {id:"cloud",label:"云朵灰",color:"#BFB9B4"},
+  {id:"oat",label:"燕麦色",color:"#D6BFAD"},
+  {id:"mist",label:"雾紫",color:"#A7AEDE"},
+  {id:"sky",label:"晴空蓝",color:"#B1DBF0"},
+  {id:"coral",label:"珊瑚红",color:"#F78570"}
 ] as const;
 const moodById=new Map(moods.map(m=>[m.id,m]));
 const legacyPrimary:Record<string,string>={happy:"small_happy",proud:"super_happy",relaxed:"light",moved:"shy",blank:"calm"};
@@ -54,12 +54,14 @@ export function moodForRecord(record:{mood:string;moodLabel:string;moodIcon:stri
 const KEY="qingtian-local-data-v1";
 const empty:Data={profile:null,notes:[],days:[],customMoods:[],privacy:null};
 const legacyMoodColors:Record<string,string>={
-  "#F3A3B7":"#F5A0A7","#F7AAA9":"#F5A0A7","#E9A4A6":"#F5A0A7",
-  "#F2B77E":"#CDBBAA","#A9D36F":"#A9D65D","#8FC9EA":"#8FD1F3","#B1A3E1":"#9EA9EA"
+  "#FFD04D":"#FBCC34","#DFE86D":"#E5E384","#C9EBDD":"#CEE9D5","#F5A0A7":"#FAB3AF","#A9D65D":"#BFD15E",
+  "#B9B9B7":"#BFB9B4","#CDBBAA":"#D6BFAD","#9EA9EA":"#A7AEDE","#8FD1F3":"#B1DBF0","#F47B68":"#F78570",
+  "#F3A3B7":"#FAB3AF","#F7AAA9":"#FAB3AF","#E9A4A6":"#FAB3AF","#F2B77E":"#D6BFAD",
+  "#A9D36F":"#BFD15E","#8FC9EA":"#B1DBF0","#B1A3E1":"#A7AEDE"
 };
 function migrateMood<T extends {mood:string;moodLabel:string;moodIcon:string;moodColor?:string}>(record:T):T{
   const nextId=legacyPrimary[record.mood];
-  if(!nextId){const storedColor=record.moodColor&&legacyMoodColors[record.moodColor]||record.moodColor;return{...record,moodColor:moodColor(record.mood,storedColor)}}
+  if(!nextId){const storedColor=record.moodColor&&(legacyMoodColors[record.moodColor]||record.moodColor);return{...record,moodColor:storedColor||moodColor(record.mood)}}
   const next=moodById.get(nextId)!;
   return{...record,mood:next.id,moodLabel:next.label,moodIcon:next.icon,moodColor:next.color};
 }
